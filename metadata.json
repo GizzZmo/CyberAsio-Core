@@ -1,0 +1,5 @@
+{
+  "name": "CyberASIO Core",
+  "description": "A simulated control panel for a futuristic ASIO driver, featuring a cyberpunk UI to manage low-latency audio settings and playback for generic sound devices on Windows 11.",
+  "requestFramePermissions": []
+}
