@@ -12,12 +12,6 @@ dist
 dist-ssr
 *.local
 
-# C++ build artifacts
-cpp-backend/build/
-cpp-backend/*.o
-cpp-backend/*.exe
-cpp-backend/config.txt
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

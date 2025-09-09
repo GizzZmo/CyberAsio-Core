@@ -1,4 +1,3 @@
-
 <div class="min-h-screen bg-[#0a0a1a] text-cyan-300 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
   <div class="w-full max-w-7xl mx-auto border-2 border-fuchsia-500/50 bg-black/30 backdrop-blur-sm p-4 sm:p-6 rounded-lg shadow-[0_0_25px_rgba(217,70,239,0.4)]">
     
@@ -8,7 +7,7 @@
         CYBER<span class="text-fuchsia-500">ASIO</span> CORE
       </h1>
       <div class="flex items-center space-x-4">
-        <span class="font-orbitron text-sm hidden sm:inline">v1.1.0</span>
+        <span class="font-orbitron text-sm hidden sm:inline">v1.2.0</span>
         <div class="flex items-center space-x-2">
           <div [class]="'w-3 h-3 rounded-full ' + (driverStatus() === 'ONLINE' ? 'bg-green-400 animate-pulse' : 'bg-red-500')"
                [class.shadow-[0_0_8px_rgba(74,222,128,0.8)]]="driverStatus() === 'ONLINE'"
@@ -126,18 +125,31 @@
         <!-- Visualizer and Player -->
         <div class="bg-gray-900/50 border border-cyan-400/30 p-4 rounded">
           <h2 class="font-orbitron text-lg text-fuchsia-400 mb-2 tracking-wider">SYSTEM PLAYBACK TEST</h2>
-          <p class="text-center text-xs text-gray-400 mb-4 truncate" title="{{ currentFileName() }}">
+          <p class="text-center text-xs text-gray-400 truncate" title="{{ currentFileName() }}">
             NOW PLAYING: {{ currentFileName() }}
           </p>
+          <!-- Visualization Mode Selector -->
+          <div class="flex justify-center gap-2 my-4">
+            <button (click)="setVisualizationType('BARS')" class="text-xs px-3 py-1 rounded transition-colors" [class]="visualizationType() === 'BARS' ? 'bg-fuchsia-600 text-white shadow-[0_0_10px_rgba(192,38,211,0.7)]' : 'bg-gray-800 hover:bg-gray-700'">Bars</button>
+            <button (click)="setVisualizationType('SPECTROGRAM')" class="text-xs px-3 py-1 rounded transition-colors" [class]="visualizationType() === 'SPECTROGRAM' ? 'bg-fuchsia-600 text-white shadow-[0_0_10px_rgba(192,38,211,0.7)]' : 'bg-gray-800 hover:bg-gray-700'">Spectrogram</button>
+            <button (click)="setVisualizationType('WAVEFORM')" class="text-xs px-3 py-1 rounded transition-colors" [class]="visualizationType() === 'WAVEFORM' ? 'bg-fuchsia-600 text-white shadow-[0_0_10px_rgba(192,38,211,0.7)]' : 'bg-gray-800 hover:bg-gray-700'">Waveform</button>
+          </div>
+
           <!-- Visualizer -->
-          <div class="w-full h-40 bg-black/50 flex items-end justify-center space-x-1 p-2 rounded border border-gray-700">
-            @for (barHeight of visualizerBars(); track $index) {
-              <div class="w-full bg-gradient-to-t from-fuchsia-600 to-cyan-400 rounded-t-sm" 
-                   [style.height.%]="barHeight"
-                   [style.box-shadow]="'0 0 5px #00f2ea'">
-              </div>
+          <div class="w-full h-40 bg-gradient-to-b from-fuchsia-900/30 to-cyan-900/10 p-2 rounded border border-gray-700 overflow-hidden">
+            @switch (visualizationType()) {
+              @case ('BARS') {
+                <canvas #barsCanvas class="w-full h-full rounded"></canvas>
+              }
+              @case ('SPECTROGRAM') {
+                <canvas #spectrogramCanvas class="w-full h-full rounded"></canvas>
+              }
+              @case ('WAVEFORM') {
+                <canvas #waveformCanvas class="w-full h-full rounded"></canvas>
+              }
             }
           </div>
+
           <!-- Player Controls -->
           <div class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <input type="file" id="audio-upload" class="hidden" (change)="onFileSelected($event)" accept="audio/*">

@@ -1,2 +1,0 @@
-# Hashes of file build rules.
-ad26e1675224f2df3cfce1eb0b41562b CMakeFiles/copy_static_files
