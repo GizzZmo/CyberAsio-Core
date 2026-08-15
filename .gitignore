@@ -7,10 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
 *.local
+.angular
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +26,27 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# C++ / CMake build artifacts (keep binary only if intentionally versioned)
+cpp-backend/build/CMakeFiles/
+cpp-backend/build/CMakeCache.txt
+cpp-backend/build/*.cmake
+cpp-backend/build/Makefile
+cpp-backend/build/*.o
+cpp-backend/build/*.a
+# Uncomment the next line once you stop shipping the binary in git:
+# cpp-backend/build/
+
+# Playwright / screenshots (local)
+test-results/
+playwright-report/
+screenshots/
+capture.mjs
+
+# OS
+Thumbs.db

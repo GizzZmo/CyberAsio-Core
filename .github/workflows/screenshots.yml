@@ -1,0 +1,106 @@
+name: Screenshots & Visual Assets
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # Uncomment to run nightly
+  # schedule:
+  #   - cron: '0 4 * * *'
+
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    name: Generate UI Screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production
+        run: npm run build
+
+      - name: Serve app & capture screenshots
+        run: |
+          npx --yes serve dist -l 4173 &
+          SERVER_PID=$!
+          sleep 3
+
+          # Create output directory
+          mkdir -p screenshots
+
+          # Inline Playwright capture script
+          cat > capture.mjs << 'EOF'
+          import { chromium } from 'playwright';
+
+          const browser = await chromium.launch({ headless: true });
+          const context = await browser.newContext({
+            viewport: { width: 1440, height: 900 },
+            deviceScaleFactor: 2
+          });
+          const page = await context.newPage();
+
+          await page.goto('http://127.0.0.1:4173', { waitUntil: 'networkidle' });
+          await page.waitForTimeout(1500);
+
+          // Overview
+          await page.screenshot({ path: 'screenshots/overview.png', fullPage: true });
+
+          // Force Bars mode (default usually)
+          await page.getByRole('button', { name: 'Bars' }).click().catch(() => {});
+          await page.waitForTimeout(800);
+          await page.screenshot({ path: 'screenshots/bars-mode.png', fullPage: true });
+
+          // Spectrogram
+          await page.getByRole('button', { name: 'Spectrogram' }).click().catch(() => {});
+          await page.waitForTimeout(800);
+          await page.screenshot({ path: 'screenshots/spectrogram-mode.png', fullPage: true });
+
+          // Waveform
+          await page.getByRole('button', { name: 'Waveform' }).click().catch(() => {});
+          await page.waitForTimeout(800);
+          await page.screenshot({ path: 'screenshots/waveform-mode.png', fullPage: true });
+
+          // Close-up of settings area if possible
+          const settings = page.locator('text=CORE SETTINGS').first();
+          if (await settings.count()) {
+            await settings.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            await page.screenshot({ path: 'screenshots/settings-panel.png' });
+          }
+
+          await browser.close();
+          console.log('Screenshots captured successfully');
+          EOF
+
+          node capture.mjs
+
+          kill $SERVER_PID || true
+
+      - name: Upload screenshots artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: screenshots/
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: List generated files
+        run: ls -la screenshots/ || true
